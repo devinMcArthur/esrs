@@ -1,3 +1,13 @@
+# Development
+
+## Docker Compose
+
+To start the development environment, with all necessary resources, run the following command:
+
+```shell
+docker compose up
+```
+
 ## Start Eventstore Locally
 
 ```shell
