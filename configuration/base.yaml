@@ -1,0 +1,13 @@
+application:
+  host: 0.0.0.0
+  port: 8080
+  domain: "localhost"
+  secure: false
+database:
+  host: "db"
+  port: 5432
+  username: "user"
+  password: "password"
+  database_name: "timetracker"
+eventstore:
+  url: "esdb://localhost:2113?tls=false"

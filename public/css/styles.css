@@ -1,0 +1,24 @@
+/* This will apply to all scrollbars on the page */
+::-webkit-scrollbar {
+  width: 12px;
+  /* Width of the vertical scrollbar */
+  height: 12px;
+  /* Height of the horizontal scrollbar */
+}
+
+/* Track */
+/* ::-webkit-scrollbar-track {} */
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #444;
+  /* Color of the handle */
+  border-radius: 6px;
+  /* Radius of the handle */
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+  /* Color of the handle when you hover over it */
+}
