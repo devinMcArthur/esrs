@@ -3,15 +3,14 @@ use std::{net::TcpListener, path::PathBuf, sync::Arc};
 use actix_cors::Cors;
 use actix_files::Files;
 use actix_web::{dev::Server, web, App, HttpServer};
-use eventstore::{SubscribeToAllOptions, SubscriptionFilter};
-use serde_json::Value;
+use log::error;
 use sqlx::PgPool;
 use tokio::sync::broadcast;
 use tracing_actix_web::TracingLogger;
 
 use crate::{
     configuration::{get_connection_pool, get_eventstore_client, Settings},
-    events::jobsite::{JobsiteCreated, JobsiteUpdated},
+    events::jobsite::JobsiteReadModelHandler,
     models::jobsite::Jobsite,
     routes::{
         get_jobsite, get_jobsites, get_landing_page, get_not_found_page, health_check,
@@ -81,104 +80,15 @@ async fn run_event_handlers(
     db_pool: Arc<PgPool>,
     app_state: AppState,
 ) {
-    let jobsite_filter = SubscriptionFilter::on_stream_name().add_prefix("jobsite-");
+    let jobsite_read_model_handler =
+        JobsiteReadModelHandler::new(eventstore.clone(), db_pool.clone(), app_state.clone());
+    let jobsite_read_model_event_handler = tokio::spawn(async move {
+        jobsite_read_model_handler.subscribe().await;
+    });
 
-    let mut subscription = eventstore
-        .subscribe_to_all(&SubscribeToAllOptions::default().filter(jobsite_filter))
-        .await;
-
-    while let Ok(resolved_event) = subscription.next().await {
-        if let Some(event_data) = resolved_event.event {
-            let event_json: Value = match serde_json::from_slice(&event_data.data) {
-                Ok(json) => json,
-                Err(e) => {
-                    eprintln!("Failed to deserialize event data: {}", e);
-                    continue;
-                }
-            };
-
-            match event_data.event_type.as_str() {
-                "JobsiteCreated" => {
-                    let event: JobsiteCreated = match serde_json::from_value(event_json) {
-                        Ok(event) => event,
-                        Err(e) => {
-                            eprintln!("Failed to deserialize event data: {}", e);
-                            continue;
-                        }
-                    };
-
-                    let mut transaction = match db_pool.begin().await {
-                        Ok(transaction) => transaction,
-                        Err(e) => {
-                            eprintln!("Failed to start transaction: {}", e);
-                            continue;
-                        }
-                    };
-
-                    match Jobsite::create(&mut transaction, event).await {
-                        Ok(jobsite) => match transaction.commit().await {
-                            Ok(_) => {
-                                if let Err(e) = app_state
-                                    .jobsite_tx
-                                    .send(JobsiteBroadcast::JobsiteCreated(jobsite))
-                                {
-                                    eprintln!("Failed to send jobsite to channel: {}", e);
-                                }
-                            }
-                            Err(e) => {
-                                eprintln!("Failed to commit transaction: {}", e);
-                            }
-                        },
-                        Err(e) => {
-                            eprintln!("Failed to create jobsite in read model: {}", e);
-                            if let Err(e) = transaction.rollback().await {
-                                eprintln!("Failed to rollback transaction: {}", e);
-                            }
-                        }
-                    }
-                }
-                "JobsiteUpdated" => {
-                    let event: JobsiteUpdated = match serde_json::from_value(event_json) {
-                        Ok(event) => event,
-                        Err(e) => {
-                            eprintln!("Failed to deserialize event data: {}", e);
-                            continue;
-                        }
-                    };
-
-                    let mut transaction = match db_pool.begin().await {
-                        Ok(transaction) => transaction,
-                        Err(e) => {
-                            eprintln!("Failed to start transaction: {}", e);
-                            continue;
-                        }
-                    };
-
-                    match Jobsite::update(&mut transaction, event).await {
-                        Ok(jobsite) => match transaction.commit().await {
-                            Ok(_) => {
-                                if let Err(e) = app_state
-                                    .jobsite_tx
-                                    .send(JobsiteBroadcast::JobsiteUpdated(jobsite))
-                                {
-                                    eprintln!("Failed to send jobsite to channel: {}", e);
-                                }
-                            }
-                            Err(e) => {
-                                eprintln!("Failed to commit transaction: {}", e);
-                            }
-                        },
-                        Err(e) => {
-                            eprintln!("Failed to update jobsite in read model: {}", e);
-                            if let Err(e) = transaction.rollback().await {
-                                eprintln!("Failed to rollback transaction: {}", e);
-                            }
-                        }
-                    }
-                }
-                // Handle other event types here
-                _ => println!("Unknown event type: {}", event_data.event_type),
-            }
+    tokio::select! {
+        _ = jobsite_read_model_event_handler => {
+            error!("Jobsite read model event handler stopped");
         }
     }
 }
@@ -210,7 +120,7 @@ impl Application {
 
         let app_state = AppState { jobsite_tx };
 
-        // sqlx::migrate!()
+        // sqlx::migrate!("./migrations")
         //     .run(&connection_pool)
         //     .await
         //     .expect("Failed to migrate the database.");
@@ -253,10 +163,10 @@ impl Application {
 
         tokio::select! {
             _ = server => {
-                eprintln!("Server stopped");
+                error!("Server stopped");
             }
             _ = event_handler => {
-                eprintln!("Event handler stopped");
+                error!("Event handler stopped");
             }
         }
 

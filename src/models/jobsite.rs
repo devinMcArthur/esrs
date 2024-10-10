@@ -13,7 +13,7 @@ pub struct Jobsite {
 impl Jobsite {
     pub async fn create(
         transaction: &mut Transaction<'_, Postgres>,
-        created_event: JobsiteCreated,
+        created_event: &JobsiteCreated,
     ) -> Result<Self, sqlx::Error> {
         sqlx::query_as!(
             Self,
@@ -31,7 +31,7 @@ impl Jobsite {
 
     pub async fn update(
         transaction: &mut Transaction<'_, Postgres>,
-        updated_event: JobsiteUpdated,
+        updated_event: &JobsiteUpdated,
     ) -> Result<Self, sqlx::Error> {
         sqlx::query_as!(
             Self,

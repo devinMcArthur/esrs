@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use actix_web::{rt, web, HttpRequest, HttpResponse};
 use actix_ws::{Message, MessageStream, Session};
 use leptos::view;
+use log::error;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use tokio_stream::StreamExt;
@@ -90,7 +91,7 @@ async fn handle_client_message(
             }
         }
     } else {
-        eprintln!("Failed to parse client message: {}", text);
+        error!("Failed to parse client message: {}", text);
     }
 }
 

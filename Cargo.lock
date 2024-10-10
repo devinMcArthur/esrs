@@ -1017,6 +1017,7 @@ dependencies = [
  "config 0.13.4",
  "eventstore",
  "leptos",
+ "log",
  "reqwest",
  "secrecy",
  "serde",

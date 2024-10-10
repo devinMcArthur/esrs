@@ -22,13 +22,7 @@ pub fn JobsiteList(
             hx-swap-oob=hx_swap_oob
             data-append=data_append
         >
-            {if jobsites.is_empty() {
-                view! {
-                    <div class="text-center text-white text-lg">No jobsites found</div>
-                }.into_view()
-            } else {
-                jobsites.into_iter().map(|jobsite| view! { <JobsiteRow jobsite=jobsite.clone() jobsite_id=jobsite.id /> }).collect::<Vec<_>>().into_view()
-            }}
+            {jobsites.into_iter().map(|jobsite| view! { <JobsiteRow jobsite=jobsite.clone() jobsite_id=jobsite.id /> }).collect::<Vec<_>>().into_view()}
         </div>
     }
 }

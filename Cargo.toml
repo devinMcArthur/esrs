@@ -28,6 +28,7 @@ anyhow = "1"
 tracing = { version = "0.1", features = ["log"] }
 tracing-log = "0.1"
 tracing-actix-web = "0.7"
+log = "0.4"
 
 [dependencies.sqlx]
 version = "0.8"
@@ -47,3 +48,6 @@ version = "0.11"
 default-features = false
 # We need the `json` feature flag to serialize/deserialize JSON payloads
 features = ["json", "rustls-tls", "cookies"]
+
+[profile.dev.package.sqlx-macros]
+opt-level = 3
