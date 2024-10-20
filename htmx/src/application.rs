@@ -4,18 +4,15 @@ use actix_cors::Cors;
 use actix_files::Files;
 use actix_web::{dev::Server, web, App, HttpServer};
 use log::error;
+use models::{events::jobsite::JobsiteReadModelHandler, AppState, JobsiteBroadcast};
+use services::{configuration::Settings, get_connection_pool, get_eventstore_client};
 use sqlx::PgPool;
 use tokio::sync::broadcast;
 use tracing_actix_web::TracingLogger;
 
-use crate::{
-    configuration::{get_connection_pool, get_eventstore_client, Settings},
-    events::jobsite::JobsiteReadModelHandler,
-    models::jobsite::Jobsite,
-    routes::{
-        get_jobsite, get_jobsites, get_landing_page, get_not_found_page, health_check,
-        post_jobsite, put_jobsite, websocket,
-    },
+use crate::routes::{
+    get_jobsite, get_jobsites, get_landing_page, get_not_found_page, health_check, post_jobsite,
+    put_jobsite, websocket,
 };
 
 pub async fn run(
@@ -91,17 +88,6 @@ async fn run_event_handlers(
             error!("Jobsite read model event handler stopped");
         }
     }
-}
-
-#[derive(Clone)]
-pub enum JobsiteBroadcast {
-    JobsiteCreated(Jobsite),
-    JobsiteUpdated(Jobsite),
-}
-
-#[derive(Clone)]
-pub struct AppState {
-    pub jobsite_tx: broadcast::Sender<JobsiteBroadcast>,
 }
 
 pub struct Application {

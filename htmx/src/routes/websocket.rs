@@ -4,16 +4,13 @@ use actix_web::{rt, web, HttpRequest, HttpResponse};
 use actix_ws::{Message, MessageStream, Session};
 use leptos::view;
 use log::error;
+use models::{projections::jobsite::Jobsite, AppState, JobsiteBroadcast};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use tokio_stream::StreamExt;
 use uuid::Uuid;
 
-use crate::{
-    application::{AppState, JobsiteBroadcast},
-    models::jobsite::Jobsite,
-    views::{components, TemplateRenderer},
-};
+use crate::views::{components, TemplateRenderer};
 
 pub async fn websocket(
     req: HttpRequest,

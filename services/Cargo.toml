@@ -1,0 +1,26 @@
+[package]
+name = "services"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+eventstore = "3.0.0"
+serde = { version = "1.0", features = ["derive"] }
+serde-aux = "4"
+serde_json = "1"
+
+config = "0.13"
+secrecy = { version = "0.8", features = ["serde"] }
+
+[dependencies.sqlx]
+version = "0.8"
+default-features = false
+features = [
+  "runtime-tokio-rustls",
+  "postgres",
+  "macros",
+  "chrono",
+  "uuid",
+  "migrate",
+  "bigdecimal"
+]

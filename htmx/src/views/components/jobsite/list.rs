@@ -1,7 +1,8 @@
 use leptos::*;
+use models::projections::jobsite::Jobsite;
 use uuid::Uuid;
 
-use crate::{models::jobsite::Jobsite, views::components::jobsite::JobsiteRow};
+use crate::views::components::jobsite::JobsiteRow;
 
 #[component]
 pub fn JobsiteList(

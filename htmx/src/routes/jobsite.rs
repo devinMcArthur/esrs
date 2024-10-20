@@ -1,10 +1,12 @@
 use actix_web::{web, HttpResponse};
 use eventstore::EventData;
+use models::{
+    events::jobsite::{JobsiteCreated, JobsiteUpdated},
+    projections::jobsite::Jobsite,
+};
 use sqlx::PgPool;
 
 use crate::{
-    events::jobsite::{JobsiteCreated, JobsiteUpdated},
-    models::jobsite::Jobsite,
     utils::{ErrorProps, ErrorPropsCollection, RouteError},
     views::{components, TemplateRenderer},
 };

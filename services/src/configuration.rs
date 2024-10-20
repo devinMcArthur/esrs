@@ -1,9 +1,6 @@
 use secrecy::{ExposeSecret, Secret};
 use serde_aux::field_attributes::deserialize_number_from_string;
-use sqlx::{
-    postgres::{PgConnectOptions, PgPoolOptions, PgSslMode},
-    PgPool,
-};
+use sqlx::postgres::{PgConnectOptions, PgSslMode};
 
 #[derive(serde::Deserialize, Clone, Debug)]
 pub struct Settings {
@@ -138,19 +135,4 @@ impl DatabaseSettings {
             .port(self.port)
             .ssl_mode(ssl_mode)
     }
-}
-
-pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
-    PgPoolOptions::new()
-        .acquire_timeout(std::time::Duration::from_secs(2))
-        .connect_lazy_with(configuration.with_db())
-}
-
-pub fn get_eventstore_client(configuration: &EventStoreSettings) -> eventstore::Client {
-    let connection_string = configuration
-        .url
-        .parse()
-        .expect("Failed to parse EventStoreDB URL.");
-
-    eventstore::Client::new(connection_string).expect("Failed to create EventStoreDB client.")
 }

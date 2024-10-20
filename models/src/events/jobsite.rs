@@ -8,11 +8,11 @@ use sqlx::PgPool;
 use uuid::Uuid;
 
 use crate::{
-    application::{AppState, JobsiteBroadcast},
-    models::{
+    projections::{
         jobsite::Jobsite,
-        snapshot_positions::{SnapshotPosition, SnapshotPositionKey},
+        snapshot_position::{SnapshotPosition, SnapshotPositionKey},
     },
+    AppState, JobsiteBroadcast,
 };
 
 use super::EventParseError;

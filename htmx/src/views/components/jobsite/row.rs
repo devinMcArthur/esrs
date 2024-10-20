@@ -1,10 +1,8 @@
 use leptos::*;
+use models::projections::jobsite::Jobsite;
 use uuid::Uuid;
 
-use crate::{
-    models::jobsite::Jobsite,
-    routes::{ApiRoutes, JobsiteClientMessage},
-};
+use crate::routes::{ApiRoutes, JobsiteClientMessage};
 
 #[component]
 pub fn JobsiteRow(#[prop(optional)] jobsite: Option<Jobsite>, jobsite_id: Uuid) -> impl IntoView {

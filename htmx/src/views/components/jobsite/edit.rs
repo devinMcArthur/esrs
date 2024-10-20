@@ -1,6 +1,7 @@
 use leptos::*;
+use models::projections::jobsite::Jobsite;
 
-use crate::{models::jobsite::Jobsite, routes::ApiRoutes, views::FormError};
+use crate::{routes::ApiRoutes, views::FormError};
 
 #[component]
 pub fn JobsiteEdit(jobsite: Option<Jobsite>) -> impl IntoView {
