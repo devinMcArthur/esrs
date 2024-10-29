@@ -33,8 +33,12 @@ pub fn Header(title: String) -> impl IntoView {
         <head>
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <title>{ title }</title>
-            <script src="https://unpkg.com/htmx.org@2.0.2/dist/htmx.js" integrity="sha384-yZq+5izaUBKcRgFbxgkRYwpHhHHCpp5nseXp0MEQ1A4MTWVMnqkmcuFez8x5qfxr" crossorigin="anonymous"></script>
+            <title>{title}</title>
+            <script
+                src="https://unpkg.com/htmx.org@2.0.2/dist/htmx.js"
+                integrity="sha384-yZq+5izaUBKcRgFbxgkRYwpHhHHCpp5nseXp0MEQ1A4MTWVMnqkmcuFez8x5qfxr"
+                crossorigin="anonymous"
+            ></script>
             <script src="https://unpkg.com/htmx-ext-ws@2.0.1/ws.js"></script>
             <script src="https://cdn.tailwindcss.com"></script>
             <script src="/public/js/loading-spinner.js" defer></script>
@@ -54,6 +58,11 @@ pub fn Header(title: String) -> impl IntoView {
                         }
                     });
                 });
+            // If we're doing an append swap, ensure the element is not already in the
+            // DOM, used when a websocket needs to update an existing element in some
+            // clients and append it as new in others
+
+            // Check if the elemtent is already in the DOM
             </script>
         </head>
     }

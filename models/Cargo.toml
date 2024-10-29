@@ -3,12 +3,17 @@ name = "models"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-services = { path = "../services" }
+[features]
+default = ["connect"]
+# default = []
+connect = ["dep:sqlx", "dep:eventstore", "dep:tokio", "dep:services"]
 
-eventstore = "3.0.0"
-tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
-uuid = { version = "1.10.0", features = ["v4"] }
+[dependencies]
+services = { path = "../services", optional = true }
+
+eventstore = { version = "3.0.0", optional = true }
+tokio = { version = "1.41", features = ["macros", "rt-multi-thread"], optional = true }
+uuid = { version = "1.10.0", features = ["v4", "serde"] }
 
 serde = { version = "1.0", features = ["derive"] }
 serde-aux = "4"
@@ -24,6 +29,7 @@ log = "0.4"
 [dependencies.sqlx]
 version = "0.8"
 default-features = false
+optional = true
 features = [
   "runtime-tokio-rustls",
   "postgres",

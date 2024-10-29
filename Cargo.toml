@@ -1,11 +1,24 @@
 [workspace]
 
 members = [
-  "htmx",
-  "models",
-  "services"
+  "htmx", "leptos-ssr", "models", "services"
 ]
 resolver = "2"
 
 [profile.dev.package.sqlx-macros]
 opt-level = 3
+
+# Move any profile configurations here
+[profile.release]
+# Your release profile settings
+
+[profile.dev]
+# Your dev profile settings
+
+# If you have the wasm profile from leptos-ssr, move it here
+[profile.wasm-release]
+inherits = "release"
+opt-level = 'z'
+lto = true
+codegen-units = 1
+panic = "abort"

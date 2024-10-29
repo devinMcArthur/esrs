@@ -133,6 +133,8 @@ impl Application {
             run_event_handlers(event_store, db_pool, app_state).await;
         });
 
+        println!("Server running on port {}", port);
+
         Ok(Self {
             server,
             event_handler,

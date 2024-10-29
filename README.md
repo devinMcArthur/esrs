@@ -1,5 +1,23 @@
 # Development
 
+## Prerequisites
+
+Need to use Rust nightly
+
+```shell
+rustup toolchain install nightly
+rustup override set nightly
+```
+
+Add the wasm32-unknown-unknown target
+
+```shell
+rustup target add wasm32-unknown-unknown
+```
+
+Leptos [DX](https://book.leptos.dev/getting_started/leptos_dx.html)
+
+
 ## Docker Compose
 
 To start the development environment, with all necessary resources, run the following command:

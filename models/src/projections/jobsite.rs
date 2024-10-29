@@ -1,7 +1,9 @@
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "connect")]
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
+#[cfg(feature = "connect")]
 use crate::events::jobsite::{JobsiteCreated, JobsiteUpdated};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -10,6 +12,7 @@ pub struct Jobsite {
     pub name: String,
 }
 
+#[cfg(feature = "connect")]
 impl Jobsite {
     pub async fn create(
         transaction: &mut Transaction<'_, Postgres>,

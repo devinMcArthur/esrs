@@ -1,21 +1,13 @@
-use std::sync::Arc;
-
-use eventstore::{Position, ResolvedEvent};
-use log::error;
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
-use sqlx::PgPool;
-use uuid::Uuid;
-
-use crate::{
-    projections::{
-        jobsite::Jobsite,
-        snapshot_position::{SnapshotPosition, SnapshotPositionKey},
-    },
-    AppState, JobsiteBroadcast,
+#[cfg(feature = "connect")]
+use {
+    log::error,
+    serde_json::Value,
+    crate::AppState,
+    super::EventParseError
 };
 
-use super::EventParseError;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct JobsiteCreated {
@@ -28,7 +20,10 @@ impl JobsiteCreated {
         String::from("JobsiteCreated")
     }
 
+    #[cfg(feature = "connect")]
     pub async fn handle_read_model(&self, handler: JobsiteReadModelHandler) -> anyhow::Result<()> {
+        use crate::{projections::jobsite::Jobsite, JobsiteBroadcast};
+
         let mut transaction = handler
             .db_pool
             .begin()
@@ -71,7 +66,10 @@ impl JobsiteUpdated {
         String::from("JobsiteUpdated")
     }
 
+    #[cfg(feature = "connect")]
     pub async fn handle_read_model(&self, handler: JobsiteReadModelHandler) -> anyhow::Result<()> {
+        use crate::{projections::jobsite::Jobsite, JobsiteBroadcast};
+
         let mut transaction = handler
             .db_pool
             .begin()
@@ -112,10 +110,11 @@ pub enum JobsiteEvent {
     JobsiteUpdated(JobsiteUpdated),
 }
 
-impl TryFrom<ResolvedEvent> for JobsiteEvent {
+#[cfg(feature = "connect")]
+impl TryFrom<eventstore::ResolvedEvent> for JobsiteEvent {
     type Error = EventParseError;
 
-    fn try_from(value: ResolvedEvent) -> Result<Self, Self::Error> {
+    fn try_from(value: eventstore::ResolvedEvent) -> Result<Self, Self::Error> {
         let event_data = value.event.ok_or(EventParseError::MissingEventData)?;
         let event_json: Value = serde_json::from_slice(&event_data.data)
             .map_err(EventParseError::DeserializationError)?;
@@ -135,10 +134,12 @@ impl TryFrom<ResolvedEvent> for JobsiteEvent {
 }
 
 impl JobsiteEvent {
+    #[cfg(feature = "connect")]
     pub fn subscription_filter() -> eventstore::SubscriptionFilter {
         eventstore::SubscriptionFilter::on_stream_name().add_prefix("jobsite-")
     }
 
+    #[cfg(feature = "connect")]
     pub async fn handle_read_model(&self, handler: JobsiteReadModelHandler) -> anyhow::Result<()> {
         match self {
             JobsiteEvent::JobsiteCreated(event) => event.handle_read_model(handler).await,
@@ -152,16 +153,19 @@ impl JobsiteEvent {
  * Holds all necessary service connections and state to handle jobsite events
  */
 #[derive(Clone)]
+#[cfg(feature = "connect")]
 pub struct JobsiteReadModelHandler {
-    eventstore: Arc<eventstore::Client>,
-    db_pool: Arc<PgPool>,
+    eventstore: std::sync::Arc<eventstore::Client>,
+    db_pool: std::sync::Arc<sqlx::PgPool>,
     app_state: AppState,
 }
 
+
+#[cfg(feature = "connect")]
 impl JobsiteReadModelHandler {
     pub fn new(
-        eventstore: Arc<eventstore::Client>,
-        db_pool: Arc<PgPool>,
+        eventstore: std::sync::Arc<eventstore::Client>,
+        db_pool: std::sync::Arc<sqlx::PgPool>,
         app_state: AppState,
     ) -> Self {
         Self {
@@ -187,7 +191,7 @@ impl JobsiteReadModelHandler {
             .eventstore
             .subscribe_to_all(
                 &eventstore::SubscribeToAllOptions::default()
-                    .position(eventstore::StreamPosition::Position(Position {
+                    .position(eventstore::StreamPosition::Position(eventstore::Position {
                         commit: snapshot_position as u64,
                         prepare: snapshot_position as u64,
                     }))
@@ -232,7 +236,7 @@ impl JobsiteReadModelHandler {
             .expect("Failed to start transaction for snapshot");
 
         let snapshot_position =
-            SnapshotPosition::get_by_key(&mut transaction, SnapshotPositionKey::Jobsite)
+            crate::projections::snapshot_position::SnapshotPosition::get_by_key(&mut transaction, crate::projections::snapshot_position::SnapshotPositionKey::Jobsite)
                 .await
                 .expect("Failed to get snapshot position");
 
@@ -253,8 +257,8 @@ impl JobsiteReadModelHandler {
             .expect("Failed to start transaction for snapshot");
 
         if let Some(position) = position {
-            let snapshot_position = SnapshotPosition {
-                key: SnapshotPositionKey::Jobsite,
+            let snapshot_position = crate::projections::snapshot_position::SnapshotPosition {
+                key: crate::projections::snapshot_position::SnapshotPositionKey::Jobsite,
                 value: position as i64,
             };
 

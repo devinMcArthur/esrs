@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "connect")]
 use sqlx::{Postgres, Transaction};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -29,6 +30,7 @@ impl Into<SnapshotPositionKey> for String {
     }
 }
 
+#[cfg(feature = "connect")]
 impl SnapshotPosition {
     pub async fn get_by_key(
         transaction: &mut Transaction<'_, Postgres>,
