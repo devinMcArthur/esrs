@@ -6,10 +6,11 @@ async fn main() -> std::io::Result<()> {
     use leptos::*;
     use leptos_actix::{generate_route_list, LeptosRoutes};
     use leptos_ssr::app::*;
-    use services::get_connection_pool;
+    use services::{get_connection_pool, get_eventstore_client};
 
     let configuration = services::configuration::get_configuration().unwrap();
     let db_pool = get_connection_pool(&configuration.database);
+    let eventstore = get_eventstore_client(&configuration.eventstore);
 
     let conf = get_configuration(None).await.unwrap();
     let addr = conf.leptos_options.site_addr;
@@ -31,6 +32,7 @@ async fn main() -> std::io::Result<()> {
             .leptos_routes(leptos_options.to_owned(), routes.to_owned(), App)
             .app_data(web::Data::new(leptos_options.to_owned()))
             .app_data(web::Data::new(db_pool.clone()))
+            .app_data(web::Data::new(eventstore.clone()))
         //.wrap(middleware::Compress::default())
     })
     .bind(&addr)?

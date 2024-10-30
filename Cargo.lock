@@ -1795,6 +1795,7 @@ dependencies = [
  "actix-files",
  "actix-web",
  "console_error_panic_hook",
+ "eventstore",
  "http 1.1.0",
  "leptos",
  "leptos_actix",
@@ -1805,6 +1806,7 @@ dependencies = [
  "services",
  "sqlx",
  "tokio",
+ "uuid",
  "wasm-bindgen",
 ]
 

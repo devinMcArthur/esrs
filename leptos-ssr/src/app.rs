@@ -19,12 +19,10 @@ pub fn App() -> impl IntoView {
 
         // content for this welcome page
         <Router>
-            <main>
-                <Routes>
-                    <Route path="" view=Landing />
-                    <Route path="/*any" view=NotFound />
-                </Routes>
-            </main>
+            <Routes>
+                <Route path="" view=Landing />
+                <Route path="/*any" view=NotFound />
+            </Routes>
         </Router>
     }
 }

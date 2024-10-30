@@ -18,26 +18,26 @@ services:
       - /app/target
     command: cargo watch -x "run --bin htmx"
 
-  leptos-app:
-    build:
-      context: .  # Root context to access workspace
-      dockerfile: ./leptos-ssr/Dockerfile
-    ports:
-      - "3333:3333"  # Your Leptos site-addr port
-      - "3334:3334"  # Your reload-port for hot reloading
-    depends_on:
-      db:
-        condition: service_started
-      eventstore:
-        condition: service_started
-    environment:
-      - DATABASE_URL=postgres://user:password@db:5432/timetracker
-      - EVENTSTORE_CONNECTION_STRING=esdb://eventstore:2113?tls=false
-      - LEPTOS_SITE_ADDR=0.0.0.0:3333  # Important: use 0.0.0.0 instead of 127.0.0.1
-      - LEPTOS_RELOAD_PORT=3334
-    volumes:
-      - .:/app
-      - /app/target
+  # leptos-app:
+  #   build:
+  #     context: .  # Root context to access workspace
+  #     dockerfile: ./leptos-ssr/Dockerfile
+  #   ports:
+  #     - "3333:3333"  # Your Leptos site-addr port
+  #     - "3334:3334"  # Your reload-port for hot reloading
+  #   depends_on:
+  #     db:
+  #       condition: service_started
+  #     eventstore:
+  #       condition: service_started
+  #   environment:
+  #     - DATABASE_URL=postgres://user:password@db:5432/timetracker
+  #     - EVENTSTORE_CONNECTION_STRING=esdb://eventstore:2113?tls=false
+  #     - LEPTOS_SITE_ADDR=0.0.0.0:3333  # Important: use 0.0.0.0 instead of 127.0.0.1
+  #     - LEPTOS_RELOAD_PORT=3334
+  #   volumes:
+  #     - .:/app
+  #     - /app/target
       
   db:
     image: postgres:13
